@@ -27,7 +27,10 @@ def fetch_data(filename):
 
 def update_data(filename, max_age_days=7):
     filename = Path(filename)
-    deadline = filename.stat().st_mtime + max_age_days * 24 * 3600
+    try:
+        deadline = filename.stat().st_mtime + max_age_days * 24 * 3600
+    except FileNotFoundError:
+        deadline = 0
     now = time.time()
     if deadline <= now:
         fetch_data(filename)
