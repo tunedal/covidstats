@@ -12,11 +12,7 @@ from pandas import DataFrame
 import stats
 
 
-def plot_stats_on_map(outfile, excluded_countries=[]):
-    excluded_countries = set(excluded_countries)
-
-    data = list(r for r in stats.case_density()
-                if r[0] not in excluded_countries)
+def write_map(outfile, data):
     names, codes, cases, densities = zip(*data)
     df = DataFrame(dict(iso_alpha=codes,
                         cases=cases,
@@ -36,17 +32,13 @@ def plot_stats_on_map(outfile, excluded_countries=[]):
     fig.write_html(file=outfile, full_html=False, auto_open=False)
 
 
-def make_map():
-    excluded_countries=[     # extreme outliers throwing off the scale
-        "San Marino",
-    ]
-
+def make_map(data):
     # outfile = Path(__file__).parent / "map.html"
     # with outfile.open("w") as f:
-    #     plot_stats_on_map(f, excluded_countries)
+    #     write_map(f, data)
 
     buf = StringIO()
-    plot_stats_on_map(buf, excluded_countries)
+    write_map(buf, data)
     return buf.getvalue()
 
 
@@ -62,8 +54,19 @@ def process_template(template, outfile, replacements):
             outfile.write(line)
 
 
+def collect_data():
+    excluded_countries=[     # extreme outliers throwing off the scale
+        "San Marino",
+    ]
+
+    exclude_set = set(excluded_countries)
+    data = list(r for r in stats.case_density()
+                if r[0] not in excluded_countries)
+    return data
+
+
 def main():
-    map_data = make_map()
+    map_data = make_map(collect_data())
 
     replacements = {
         "map": map_data,
