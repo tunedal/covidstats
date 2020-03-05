@@ -1,5 +1,6 @@
 /env/
 *.xls
+index.html
 
 __pycache__/
 
