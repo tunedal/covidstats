@@ -49,9 +49,6 @@ def sum_country(data, country_name):
 
 
 def daily_stats():
-    # filename = (Path("~/Downloads/").expanduser() /
-    #             "COVID-19-geographic-disbtribution"
-    #             "-worldwide-5-march-2020.xls")
     filename = Path(__file__).parent / "cases.xls"
     fetch_data(filename)
     return read_file(filename)

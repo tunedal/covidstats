@@ -7,6 +7,7 @@ from io import StringIO
 
 import plotly.graph_objects as go
 import plotly.express as px
+import numpy as np
 from pandas import DataFrame
 
 import stats
@@ -21,13 +22,38 @@ def write_map(outfile, data):
 
     #print(sorted(data, key=lambda r: r[3]))
 
+    # For clarity, clip color values to 150% of the PRC value
+    # and use a logarithmic scale.
+    prc_density = next(density for name, code, case, density in data
+                       if name == "China")
+    min_density = min(density for name, code, case, density in data)
+    clip_max = prc_density * 1.5
+    color_data = np.log10(np.clip(df["density"], min_density, clip_max))
+
     fig = px.choropleth(
         df,
         locations="iso_alpha",
-        color="density",
-        hover_name="country",
+        color=color_data,
+        hover_name="density",
         height=1000,
-        color_continuous_scale=px.colors.sequential.YlOrRd)
+        color_continuous_scale=px.colors.sequential.YlOrRd,
+    )
+
+    # This math is not quite right, but it should only affect which
+    # positions on the scale are picked for labeling.
+    tick_count = 10
+    value_range = sorted(color_data)
+    tick_start_offset = tick_count - (len(value_range) - 1) % tick_count
+    ticks = [10**value_range[i]
+             for i in range(tick_start_offset,
+                            len(value_range),
+                            len(value_range) // tick_count)]
+
+    fig.update_layout(
+        coloraxis_colorbar=dict(
+            tickvals=np.log10(ticks),
+            ticktext=[f"{x:.2f}" for x in ticks],
+        ))
 
     fig.write_html(file=outfile, full_html=False, auto_open=False)
 
