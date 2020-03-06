@@ -30,11 +30,17 @@ def write_map(outfile, data):
     clip_max = prc_density * 1.5
     color_data = np.log10(np.clip(df["density"], min_density, clip_max))
 
+    # TODO: How can I use hovertemplate here?
     fig = px.choropleth(
         df,
         locations="iso_alpha",
         color=color_data,
-        hover_name="density",
+        hover_name="country",
+        hover_data=["cases", "density"],
+        labels={"cases": "Confirmed cases",
+                "density": "Cases per million",
+                "iso_alpha": "Country code",
+                "color": "Color value"},
         height=1000,
         color_continuous_scale=px.colors.sequential.YlOrRd,
     )
@@ -51,6 +57,7 @@ def write_map(outfile, data):
 
     fig.update_layout(
         coloraxis_colorbar=dict(
+            title="Cases/million",
             tickvals=np.log10(ticks),
             ticktext=[f"{x:.2f}" for x in ticks],
         ))
