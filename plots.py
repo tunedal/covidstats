@@ -4,6 +4,7 @@
 import sys, time, re
 from pathlib import Path
 from io import StringIO
+from math import log10
 
 import plotly.graph_objects as go
 import plotly.express as px
@@ -45,21 +46,16 @@ def write_map(outfile, data):
         color_continuous_scale=px.colors.sequential.YlOrRd,
     )
 
-    # This math is not quite right, but it should only affect which
-    # positions on the scale are picked for labeling.
     tick_count = 10
-    value_range = sorted(color_data)
-    tick_start_offset = tick_count - (len(value_range) - 1) % tick_count
-    ticks = [10**value_range[i]
-             for i in range(tick_start_offset,
-                            len(value_range),
-                            len(value_range) // tick_count)]
+    tick_step = (log10(clip_max) - log10(min_density)) / (tick_count - 1)
+    ticks = [log10(min_density) + tick_step * i
+             for i in range(tick_count)]
 
     fig.update_layout(
         coloraxis_colorbar=dict(
             title="Cases/million",
-            tickvals=np.log10(ticks),
-            ticktext=[f"{x:.2f}" for x in ticks],
+            tickvals=ticks,
+            ticktext=[f"{10**x:.2f}" for x in ticks],
         ))
 
     fig.write_html(file=outfile, full_html=False, auto_open=False)
