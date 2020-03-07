@@ -1,7 +1,7 @@
 import sys
 from collections import defaultdict
 
-import ecdc_reader, popreader
+import readers.ecdc_reader, readers.popreader
 
 
 # Maps the World Bank's country names to ECDC's names.
@@ -15,7 +15,7 @@ country_name_map = {
 
 
 def latest_population_count():
-    for r in popreader.latest_population_count():
+    for r in readers.popreader.latest_population_count():
         canonical_name = country_name_map.get(r.country_name)
         if canonical_name:
             yield r._replace(country_name=canonical_name)
@@ -36,7 +36,7 @@ def sum_days(data):
 
 
 def case_density(countries=[]):
-    stats = list(ecdc_reader.daily_stats())
+    stats = list(readers.ecdc_reader.daily_stats())
     popcount = list(latest_population_count())
     pop_by_country = {p.country_name: p.population
                       for p in popcount}
@@ -61,7 +61,7 @@ def main():
     countries = set(s.lower() for s in sys.argv[1:])
     pop_by_country = {p.country_name: p.population
                       for p in latest_population_count()}
-    for country, cases, deaths in sum_days(ecdc_reader.daily_stats()):
+    for country, cases, deaths in sum_days(readers.ecdc_reader.daily_stats()):
         if country.lower() in countries:
             cases_per_million = 1_000_000 * cases / pop_by_country[country]
             print(country, cases, cases_per_million)

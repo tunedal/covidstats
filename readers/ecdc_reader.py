@@ -9,6 +9,8 @@ import xlrd, requests
 
 ENDPOINT = "https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases"
 
+CACHE_DIR = Path(__file__).parent / "../cache"
+
 CaseDayData = namedtuple(
     "CaseDayData", "DateRep CountryExp NewConfCases NewDeaths GeoId EU")
 
@@ -25,6 +27,7 @@ def scrape_for_data_url(url):
 def fetch_data(filename):
     url = scrape_for_data_url(ENDPOINT)
     r = requests.get(url, stream=True)
+    filename.parent.mkdir(exist_ok=True)
     with open(filename, "wb") as f:
         for chunk in r.iter_content(chunk_size=128):
             f.write(chunk)
@@ -49,7 +52,7 @@ def sum_country(data, country_name):
 
 
 def daily_stats():
-    filename = Path(__file__).parent / "cases.xls"
+    filename = CACHE_DIR / "cases.xls"
     fetch_data(filename)
     return read_file(filename)
 

@@ -10,7 +10,7 @@ import xlrd, requests
 ENDPOINT = ("https://api.worldbank.org/v2/en/indicator/" +
             "SP.POP.TOTL?downloadformat=excel")
 
-CACHE_DIR = Path(__file__).parent
+CACHE_DIR = Path(__file__).parent / "../cache"
 
 
 PopData = namedtuple(
@@ -20,6 +20,7 @@ PopData = namedtuple(
 
 def fetch_data(filename):
     r = requests.get(ENDPOINT, stream=True)
+    filename.parent.mkdir(exist_ok=True)
     with open(filename, "wb") as f:
         for chunk in r.iter_content(chunk_size=128):
             f.write(chunk)
