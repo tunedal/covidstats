@@ -13,6 +13,15 @@ ENDPOINT = "https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-ca
 CACHE_DIR = Path(__file__).parent / "../cache"
 
 
+class EcdcDataSource:
+    name = "European Centre for Disease Prevention and Control"
+    info_url = ("https://www.ecdc.europa.eu/en/"
+                "geographical-distribution-2019-ncov-cases")
+
+    def __iter__(self):
+        return daily_stats()
+
+
 def scrape_for_data_url(url):
     # I know, I know, but this is more extracting than parsing.
     # https://stackoverflow.com/a/1732454

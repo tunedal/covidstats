@@ -1,7 +1,3 @@
-# Data source:
-# Johns Hopkins University Center for Systems Science and Engineering
-# https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
-
 import csv, datetime
 from contextlib import contextmanager
 from collections import namedtuple, defaultdict
@@ -23,6 +19,16 @@ country_name_map = {
     "US": "United States of America",
     "UK": "United Kingdom",
 }
+
+
+class JhuCsseDataSource:
+    name = ("Johns Hopkins University"
+            " Center for Systems Science and Engineering")
+    info_url = ("https://data.humdata.org/dataset/"
+                "novel-coronavirus-2019-ncov-cases")
+
+    def __iter__(self):
+        return daily_stats()
 
 
 @contextmanager

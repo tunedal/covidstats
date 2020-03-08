@@ -6,5 +6,12 @@ CaseDayData = namedtuple(
     "DateRep CountryExp NewConfCases NewDeaths GeoId EU")
 
 
-from .ecdc_reader import daily_stats as ecdc_source
-from .jhucsse_reader import daily_stats as jhucsse_source
+def __getattr__(name):
+    if name == "ecdc_source":
+        from .ecdc_reader import EcdcDataSource
+        return EcdcDataSource
+    elif name == "jhucsse_source":
+        from .jhucsse_reader import JhuCsseDataSource
+        return JhuCsseDataSource
+    else:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

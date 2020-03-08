@@ -72,15 +72,10 @@ def make_map(data):
 
 
 def process_template(template, outfile, replacements):
-    if isinstance(replacements, dict):
-        replacements = replacements.items()
-    line_map = {f"<!-- INSERT {rid.upper()} -->\n": data
-                for rid, data in replacements}
+    pat = re.compile(r"<!-- *INSERT +([A-Za-z-]+) *-->")
+    subs = {k.upper(): v for k, v in replacements.items()}
     for line in template:
-        if line in line_map:
-            outfile.write(line_map[line])
-        else:
-            outfile.write(line)
+        outfile.write(pat.sub(lambda m: subs[m.group(1)], line))
 
 
 def collect_data(data_source):
@@ -110,7 +105,9 @@ def main():
 
     replacements = {
         "map": map_data,
-        "date": time.strftime("%Y-%m-%d %H:%M:%S")
+        "date": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "source-name": data_source.name,
+        "source-url": data_source.info_url,
     }
 
     if len(rest_args) == 0:
