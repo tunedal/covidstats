@@ -11,7 +11,7 @@ import plotly.express as px
 import numpy as np
 from pandas import DataFrame
 
-import stats
+import stats, readers
 
 
 def write_map(outfile, data):
@@ -83,29 +83,40 @@ def process_template(template, outfile, replacements):
             outfile.write(line)
 
 
-def collect_data():
+def collect_data(data_source):
     excluded_countries=[     # extreme outliers throwing off the scale
         "San Marino",
     ]
 
     exclude_set = set(excluded_countries)
-    data = list(r for r in stats.case_density()
+    data = list(r for r in stats.case_density(data_source)
                 if r[0] not in excluded_countries)
     return data
 
 
 def main():
-    map_data = make_map(collect_data())
+    data_source = readers.ecdc_source
+
+    args = iter(sys.argv[1:])
+    rest_args = []
+    for arg in args:
+        if arg == "-s":
+            data_source = getattr(readers, next(args) + "_source")
+        else:
+            rest_args.append(arg)
+
+
+    map_data = make_map(collect_data(data_source))
 
     replacements = {
         "map": map_data,
         "date": time.strftime("%Y-%m-%d %H:%M:%S")
     }
 
-    if len(sys.argv) == 1:
+    if len(rest_args) == 0:
         process_template(sys.stdin, sys.stdout, replacements)
-    elif len(sys.argv) == 2:
-        with open(sys.argv[1], "r") as f:
+    elif len(rest_args) == 1:
+        with open(rest_args[0], "r") as f:
             process_template(f, sys.stdout, replacements)
     else:
         raise Exception("Bad argument count")

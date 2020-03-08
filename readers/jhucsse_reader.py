@@ -4,7 +4,11 @@
 
 import csv, datetime
 from contextlib import contextmanager
-from collections import namedtuple
+from collections import namedtuple, defaultdict
+from itertools import groupby
+from operator import itemgetter
+
+from readers import CaseDayData
 
 
 ENDPOINT = ("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/"
@@ -12,6 +16,13 @@ ENDPOINT = ("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/"
             "time_series_19-covid-Confirmed.csv")
 
 Record = namedtuple("Record", "province country lat long cumulative_cases")
+
+# Treat ECDC's country names as canonical.
+country_name_map = {
+    "Mainland China": "China",
+    "US": "United States of America",
+    "UK": "United Kingdom",
+}
 
 
 @contextmanager
@@ -29,7 +40,7 @@ def parse_stream(stream):
 
 def parse_record(data):
     case_counts = [(parse_american_date(k), int(v)) for k, v in data.items()
-                   if k[0].isnumeric()]
+                   if k[0].isnumeric() and v]
     return Record(province=data["Province/State"] or None,
                   country=data["Country/Region"] or None,
                   lat=float(data["Lat"]),
@@ -39,3 +50,33 @@ def parse_record(data):
 
 def parse_american_date(datestr):
     return datetime.datetime.strptime(datestr, "%m/%d/%y").date()
+
+
+def daily_stats():
+    with fetch_data() as stream:
+        yield from casedaydata_from_records(parse_stream(stream))
+
+
+def casedaydata_from_records(records):
+    cases_by_country_and_date = defaultdict(int)
+    for r in records:
+        for d, cumulative_count in r.cumulative_cases:
+            cases_by_country_and_date[(r.country, d)] += cumulative_count
+
+    sorted_data = sorted((country, d, cases) for (country, d), cases
+                         in cases_by_country_and_date.items())
+    for country, g in groupby(sorted_data, key=itemgetter(0)):
+        if country in country_name_map.values():
+            raise ValueError(f"Ambiguous name {country!r}")
+        canonical_country_name = country_name_map.get(country, country)
+        preexisting_cases = 0
+        for _, d, cases in g:
+            new_cases = cases - preexisting_cases
+            preexisting_cases = cases
+            yield CaseDayData(
+                DateRep=d,
+                CountryExp=canonical_country_name,
+                NewConfCases=new_cases,
+                NewDeaths=0,
+                GeoId=None,
+                EU=None)

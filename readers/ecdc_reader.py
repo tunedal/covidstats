@@ -2,17 +2,15 @@
 
 import sys, re
 from pathlib import Path
-from collections import namedtuple
 
 import xlrd, requests
+
+from readers import CaseDayData
 
 
 ENDPOINT = "https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases"
 
 CACHE_DIR = Path(__file__).parent / "../cache"
-
-CaseDayData = namedtuple(
-    "CaseDayData", "DateRep CountryExp NewConfCases NewDeaths GeoId EU")
 
 
 def scrape_for_data_url(url):
