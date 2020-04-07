@@ -9,15 +9,14 @@ from readers import CaseDayData
 
 ENDPOINT = ("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/"
             "master/csse_covid_19_data/csse_covid_19_time_series/"
-            "time_series_19-covid-Confirmed.csv")
+            "time_series_covid19_confirmed_global.csv")
 
 Record = namedtuple("Record", "province country lat long cumulative_cases")
 
 # Treat ECDC's country names as canonical.
 country_name_map = {
-    "Mainland China": "China",
     "US": "United States of America",
-    "UK": "United Kingdom",
+    "Korea, South": "South Korea",
 }
 
 

@@ -129,12 +129,12 @@ class CaseDayDataConversionTest(TestCase):
     def test_canonicalizes_country_names(self):
         date1 = date(1970, 1, 1)
         data = [
-            make_rec("Mainland China", [(date1, 10)]),
+            make_rec("US", [(date1, 10)]),
             make_rec("Germany", [(date1, 10)]),
         ]
         result = self.casedaydata_from_records(data)
         expected = {
-            make_caseday("China", date1, 10),
+            make_caseday("United States of America", date1, 10),
             make_caseday("Germany", date1, 10),
         }
         self.assertEqual(expected, set(result))
@@ -142,7 +142,7 @@ class CaseDayDataConversionTest(TestCase):
     def test_rejects_conflicting_canonicalization(self):
         date1 = date(1970, 1, 1)
         data = [
-            make_rec("China", [(date1, 10)]),
+            make_rec("United States of America", [(date1, 10)]),
         ]
         with self.assertRaises(ValueError):
             self.casedaydata_from_records(data)
@@ -165,9 +165,9 @@ class DailyStatsTest(TestCase):
     def test_yields_casedaydata_with_country_and_cases(self):
         result = self.daily_stats()
         expected = {
-            make_caseday("China", date(2020, 1, 22), 14 + 4),
-            make_caseday("China", date(2020, 1, 23), 8 + 1),
-            make_caseday("China", date(2020, 1, 24), 14 + 3),
+            make_caseday("Mainland China", date(2020, 1, 22), 14 + 4),
+            make_caseday("Mainland China", date(2020, 1, 23), 8 + 1),
+            make_caseday("Mainland China", date(2020, 1, 24), 14 + 3),
             make_caseday("Germany", date(2020, 1, 22), 0),
             make_caseday("Germany", date(2020, 1, 23), 0),
             make_caseday("Germany", date(2020, 1, 24), 0),
