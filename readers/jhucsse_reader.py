@@ -36,6 +36,7 @@ def fetch_data():
     import requests             # a bit slow to import
     response = requests.get(ENDPOINT, stream=True)
     with response:
+        response.raise_for_status()
         yield response.iter_lines(decode_unicode=True)
 
 

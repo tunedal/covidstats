@@ -34,6 +34,7 @@ def scrape_for_data_url(url):
 def fetch_data(filename):
     url = scrape_for_data_url(ENDPOINT)
     r = requests.get(url, stream=True)
+    r.raise_for_status()
     filename.parent.mkdir(exist_ok=True)
     with open(filename, "wb") as f:
         for chunk in r.iter_content(chunk_size=128):
