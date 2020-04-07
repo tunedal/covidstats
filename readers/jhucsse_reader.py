@@ -17,6 +17,7 @@ Record = namedtuple("Record", "province country lat long cumulative_cases")
 country_name_map = {
     "US": "United States of America",
     "Korea, South": "South Korea",
+    "Taiwan*": "Taiwan",
 }
 
 

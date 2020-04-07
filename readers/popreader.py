@@ -17,6 +17,16 @@ PopData = namedtuple(
     "PopData", "country_name country_code year population")
 
 
+# Manually added data for countries missing in the World Bank's data.
+supplemental_data = [
+    # https://eng.stat.gov.tw/point.asp?index=9
+    PopData(country_name="Taiwan",
+            country_code="TWN",
+            year=2020,
+            population=23_600_903),
+]
+
+
 
 def fetch_data(filename):
     r = requests.get(ENDPOINT, stream=True)
@@ -82,11 +92,16 @@ def parse_data(rows):
                       population=int(pop))
 
 
-def latest_population_count():
+def _get_file_data():
     datafile = CACHE_DIR / "pop.xls"
     update_data(datafile)
     data = read_data_rows(datafile)
     return parse_data(data)
+
+
+def latest_population_count():
+    yield from _get_file_data()
+    yield from supplemental_data
 
 
 if __name__ == "__main__":
